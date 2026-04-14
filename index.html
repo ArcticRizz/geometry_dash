@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulse Runner</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="game-shell">
+    <canvas id="game" width="1280" height="720" aria-label="Pulse Runner game"></canvas>
+
+    <header class="hud" aria-label="Game Heads Up Display">
+      <div class="hud-panel hud-title">
+        <p class="hud-label">Pulse Runner</p>
+        <strong id="hud-level-name">Level 1. Starter Pulse</strong>
+      </div>
+
+      <div class="hud-progress hud-panel">
+        <div class="progress-copy">
+          <span id="hud-progress-text">0%</span>
+          <span id="hud-mode-text">Normal Mode</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="hud-progress-fill" class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="hud-panel hud-stats">
+        <span id="hud-attempts">Attempts 0</span>
+        <button id="menu-button" class="ghost-button hud-button" type="button">Level Select</button>
+      </div>
+    </header>
+
+    <section id="menu-overlay" class="overlay visible">
+      <div class="overlay-card">
+        <p class="eyebrow">Original Rhythm Platformer</p>
+        <h1>Pulse Runner</h1>
+        <p class="subtitle">
+          A tight, one-button platformer with 10 original stages. Tap, click, or press Space to jump.
+          Practice mode adds checkpoints so you can learn harder patterns without losing the flow.
+        </p>
+
+        <div class="menu-toolbar">
+          <button id="play-button" type="button">Play Current Level</button>
+          <button id="practice-button" type="button" class="ghost-button">Practice Mode: Off</button>
+          <button id="reset-progress-button" type="button" class="ghost-button">Reset Progress</button>
+        </div>
+
+        <div class="menu-summary" aria-label="Progress summary">
+          <article class="summary-card">
+            <span>Unlocked</span>
+            <strong id="summary-unlocked">1 / 10</strong>
+          </article>
+          <article class="summary-card">
+            <span>Completed</span>
+            <strong id="summary-completed">0 / 10</strong>
+          </article>
+          <article class="summary-card">
+            <span>Total Attempts</span>
+            <strong id="summary-attempts">0</strong>
+          </article>
+        </div>
+
+        <div id="level-list" class="level-list" aria-label="Level Select"></div>
+      </div>
+    </section>
+
+    <section id="death-overlay" class="overlay">
+      <div class="overlay-card small-card">
+        <p class="eyebrow">Game Over</p>
+        <h2>You crashed.</h2>
+        <p class="subtitle" id="death-subtitle">Hit retry to restart the level, or go back to level select.</p>
+        <div class="menu-actions stacked">
+          <button id="retry-button" type="button">Retry Level</button>
+          <button id="death-menu-button" type="button" class="ghost-button">Level Select</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="clear-overlay" class="overlay">
+      <div class="overlay-card small-card">
+        <p class="eyebrow">Level Clear</p>
+        <h2 id="clear-title">Stage Complete</h2>
+        <p class="subtitle" id="clear-subtitle">The next level is now unlocked.</p>
+        <div class="menu-actions stacked">
+          <button id="next-level-button" type="button">Next Level</button>
+          <button id="clear-replay-button" type="button" class="ghost-button">Replay Level</button>
+          <button id="clear-menu-button" type="button" class="ghost-button">Level Select</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
