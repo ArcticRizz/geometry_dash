@@ -39,6 +39,8 @@ const JUMP_VELOCITY = 598;
 const HOLD_BOOST = 170;
 const MAX_HOLD_TIME = 0.028;
 const DEATH_RESTART_DELAY = 0.42;
+const JUMP_BUFFER_TIME = 0.12;
+const COYOTE_TIME = 0.1;
 
 let audioContext = null;
 let musicState = null;
@@ -113,12 +115,76 @@ function applyDifficultyPass(level, index) {
 }
 
 function addFinalePattern(level, startBeat, index) {
-  addPortal(level, startBeat + 0.6);
-  addSpikeRow(level, startBeat + 3.1, 4, 0.14, index % 2);
-  addGap(level, startBeat + 6.1, 1.56);
-  addMover(level, startBeat + 9.4, index % 2, 82, 4.2 + index * 0.08);
-  addSpike(level, startBeat + 12.4, index % 2);
-  addGap(level, startBeat + 15.3, 1.62);
+  addSpikeRow(level, startBeat + 0.9, 3, 0.14);
+  addGap(level, startBeat + 3.5, 1.34);
+  addBlock(level, startBeat + 6.4, 0, 0.9);
+  addSpike(level, startBeat + 7.55, 1);
+  addPad(level, startBeat + 10.2, 1.08);
+  addGap(level, startBeat + 13.2, 1.4);
+  if (index >= 3) {
+    addPortal(level, startBeat + 16);
+    addSpikeRow(level, startBeat + 18.8, 2, 0.14, 1);
+  }
+}
+
+function addSafeGroundPattern(level, startBeat, index) {
+  const variant = index % 4;
+
+  if (variant === 0) {
+    addSpikeRow(level, startBeat + 0.8, 3, 0.14);
+    addGap(level, startBeat + 3.1, 1.24);
+    addBlock(level, startBeat + 5.9, 0, 0.92);
+    addSpike(level, startBeat + 7.05, 1);
+    addGap(level, startBeat + 9.9, 1.26);
+    return 13.4;
+  }
+
+  if (variant === 1) {
+    addGap(level, startBeat + 1.1, 1.18);
+    addPad(level, startBeat + 3.9, 1.07);
+    addSpikeRow(level, startBeat + 6.9, 2, 0.14);
+    addGap(level, startBeat + 9.6, 1.28);
+    addBlock(level, startBeat + 12.4, 0, 0.88);
+    addSpike(level, startBeat + 13.55, 1);
+    return 17.1;
+  }
+
+  if (variant === 2) {
+    addBlock(level, startBeat + 0.9, 0, 0.9);
+    addSpike(level, startBeat + 2.05, 1);
+    addGap(level, startBeat + 4.8, 1.22);
+    addSpikeRow(level, startBeat + 8.1, 3, 0.14);
+    addGap(level, startBeat + 11.1, 1.32);
+    return 14.7;
+  }
+
+  addSpike(level, startBeat + 0.9);
+  addGap(level, startBeat + 3.2, 1.18);
+  addBlock(level, startBeat + 6, 0, 0.86);
+  addSpike(level, startBeat + 7.15, 1);
+  addPad(level, startBeat + 9.5, 1.08);
+  addGap(level, startBeat + 12.4, 1.28);
+  return 15.8;
+}
+
+function addSafeFlipPattern(level, startBeat, index) {
+  addPortal(level, startBeat + 0.8);
+  addSpikeRow(level, startBeat + 3.2, 2 + (index % 2), 0.14, 1);
+  addGap(level, startBeat + 6.1, 1.22);
+  addPortal(level, startBeat + 9.2);
+  addSpikeRow(level, startBeat + 12.1, 2, 0.14);
+  addGap(level, startBeat + 14.8, 1.26);
+  return 18.6;
+}
+
+function addSafeMoverPattern(level, startBeat, index) {
+  addMover(level, startBeat + 1.1, 0, 66 + index * 2, 3.2 + index * 0.05);
+  addGap(level, startBeat + 4.3, 1.24);
+  addSpike(level, startBeat + 7.2);
+  addBlock(level, startBeat + 10, 0, 0.86);
+  addSpike(level, startBeat + 11.1, 1);
+  addGap(level, startBeat + 13.7, 1.28);
+  return 17.3;
 }
 
 function addMarathonSections(level, startBeat, index) {
@@ -126,17 +192,17 @@ function addMarathonSections(level, startBeat, index) {
   let section = 0;
 
   while (beat < level.lengthBeats - 24) {
-    addExtensionPattern(level, beat, index + section);
+    let consumed = 0;
 
-    if (section % 3 === 1) {
-      addSpikeRow(level, beat + 17.2, 2 + (index % 2), 0.14, (section + index) % 2);
+    if (index >= 3 && section % 5 === 3) {
+      consumed = addSafeFlipPattern(level, beat, index);
+    } else if (section % 4 === 2) {
+      consumed = addSafeMoverPattern(level, beat, index);
+    } else {
+      consumed = addSafeGroundPattern(level, beat, index + section);
     }
 
-    if (section % 4 === 2) {
-      addGap(level, beat + 18.2, 1.44 + (index % 3) * 0.04);
-    }
-
-    beat += 19;
+    beat += consumed + 2.4;
     section += 1;
   }
 
@@ -642,6 +708,8 @@ const state = {
   practiceMode: false,
   holdJump: false,
   holdTime: 0,
+  jumpBufferTimer: 0,
+  coyoteTimer: 0,
   pulseTimer: 0,
   visualPulse: 0,
   beatFlash: 0,
@@ -778,6 +846,8 @@ function resetPlayerFromCheckpoint() {
 function resetRunState() {
   state.holdJump = false;
   state.holdTime = 0;
+  state.jumpBufferTimer = 0;
+  state.coyoteTimer = 0;
   state.pulseTimer = 0;
   state.visualPulse = 0;
   state.beatFlash = 0;
@@ -1032,13 +1102,20 @@ function updateAudio(dt) {
 }
 
 function triggerJump(force = JUMP_VELOCITY) {
-  if (!state.player.grounded || !state.player.alive || state.screen !== "game") {
-    return;
+  if (!state.player.alive || state.screen !== "game") {
+    return false;
+  }
+
+  if (!state.player.grounded && state.coyoteTimer <= 0) {
+    return false;
   }
 
   state.player.grounded = false;
+  state.coyoteTimer = 0;
+  state.jumpBufferTimer = 0;
   state.player.vy = -force * state.player.gravityDir;
   playSynth("jump");
+  return true;
 }
 
 function handleInputStart() {
@@ -1061,6 +1138,7 @@ function handleInputStart() {
 
   state.holdJump = true;
   state.holdTime = 0;
+  state.jumpBufferTimer = JUMP_BUFFER_TIME;
   triggerJump();
 }
 
@@ -1112,6 +1190,9 @@ function update(dt) {
 
   updateAudio(dt);
 
+  state.jumpBufferTimer = Math.max(0, state.jumpBufferTimer - dt);
+  state.coyoteTimer = Math.max(0, state.coyoteTimer - dt);
+
   if (state.holdJump && !state.player.grounded && state.holdTime < MAX_HOLD_TIME) {
     state.holdTime += dt;
     state.player.vy -= HOLD_BOOST * dt * state.player.gravityDir;
@@ -1132,6 +1213,7 @@ function update(dt) {
       state.player.y = floorY;
       state.player.vy = 0;
       state.player.grounded = true;
+      state.coyoteTimer = COYOTE_TIME;
       state.player.rotation = 0;
     } else {
       state.player.grounded = false;
@@ -1145,6 +1227,7 @@ function update(dt) {
       state.player.y = ceilingY;
       state.player.vy = 0;
       state.player.grounded = true;
+      state.coyoteTimer = COYOTE_TIME;
       state.player.rotation = Math.PI;
     } else {
       state.player.grounded = false;
@@ -1203,6 +1286,7 @@ function update(dt) {
           state.player.y = object.y - state.player.height;
           state.player.vy = 0;
           state.player.grounded = true;
+          state.coyoteTimer = COYOTE_TIME;
         } else if (
           state.player.gravityDir === -1 &&
           previousTop >= object.y + object.height - 8 &&
@@ -1211,6 +1295,7 @@ function update(dt) {
           state.player.y = object.y + object.height;
           state.player.vy = 0;
           state.player.grounded = true;
+          state.coyoteTimer = COYOTE_TIME;
         } else {
           failRun();
         }
@@ -1224,6 +1309,10 @@ function update(dt) {
   });
 
   updateCheckpointSystem(level, playerRect);
+
+  if (state.jumpBufferTimer > 0 && (state.player.grounded || state.coyoteTimer > 0)) {
+    triggerJump();
+  }
 
   state.player.trail.unshift({
     x: state.player.x,
