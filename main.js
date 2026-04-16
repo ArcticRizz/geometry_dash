@@ -623,7 +623,7 @@ const levels = [
 levels.forEach((level) => {
   const compressionRatio = level.length / (level.lengthBeats * level.beatWidth);
   const checkpointBeats = [];
-  for (let beat = 12; beat < level.lengthBeats - 6; beat += 12) {
+  for (let beat = 90; beat < level.lengthBeats - 20; beat += 90) {
     checkpointBeats.push(beat);
   }
 
