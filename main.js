@@ -112,6 +112,37 @@ function applyDifficultyPass(level, index) {
   level.length *= densityScale;
 }
 
+function addFinalePattern(level, startBeat, index) {
+  addPortal(level, startBeat + 0.6);
+  addSpikeRow(level, startBeat + 3.1, 4, 0.14, index % 2);
+  addGap(level, startBeat + 6.1, 1.56);
+  addMover(level, startBeat + 9.4, index % 2, 82, 4.2 + index * 0.08);
+  addSpike(level, startBeat + 12.4, index % 2);
+  addGap(level, startBeat + 15.3, 1.62);
+}
+
+function addMarathonSections(level, startBeat, index) {
+  let beat = startBeat;
+  let section = 0;
+
+  while (beat < level.lengthBeats - 24) {
+    addExtensionPattern(level, beat, index + section);
+
+    if (section % 3 === 1) {
+      addSpikeRow(level, beat + 17.2, 2 + (index % 2), 0.14, (section + index) % 2);
+    }
+
+    if (section % 4 === 2) {
+      addGap(level, beat + 18.2, 1.44 + (index % 3) * 0.04);
+    }
+
+    beat += 19;
+    section += 1;
+  }
+
+  addFinalePattern(level, level.lengthBeats - 20, index);
+}
+
 function createLevel(index, config) {
   const level = {
     id: index + 1,
@@ -127,6 +158,7 @@ function createLevel(index, config) {
   };
 
   config.build(level);
+  addMarathonSections(level, config.marathonStart || Math.max(56, Math.floor(level.lengthBeats * 0.15)), index);
   level.length = level.lengthBeats * level.beatWidth;
   applyDifficultyPass(level, index);
   return level;
@@ -262,7 +294,8 @@ const levels = [
     theme: "#45b8ff",
     accent: "#b6f3ff",
     bpm: 110,
-    lengthBeats: 78,
+    lengthBeats: 760,
+    marathonStart: 82,
     build(level) {
       addSpike(level, 4);
       addSpike(level, 6.2);
@@ -287,7 +320,8 @@ const levels = [
     theme: "#57f2c1",
     accent: "#d6fff1",
     bpm: 118,
-    lengthBeats: 92,
+    lengthBeats: 980,
+    marathonStart: 92,
     build(level) {
       addSpikeRow(level, 3.5, 2, 0.21);
       addGap(level, 6.8, 0.96);
@@ -313,7 +347,8 @@ const levels = [
     theme: "#ffd166",
     accent: "#fff0c2",
     bpm: 126,
-    lengthBeats: 106,
+    lengthBeats: 1200,
+    marathonStart: 110,
     build(level) {
       addBlock(level, 5, 0, 1);
       addSpike(level, 6.4, 1);
@@ -342,7 +377,8 @@ const levels = [
     theme: "#ff8fab",
     accent: "#ffd7e3",
     bpm: 132,
-    lengthBeats: 118,
+    lengthBeats: 1450,
+    marathonStart: 122,
     build(level) {
       addSpike(level, 4);
       addPad(level, 6.7, 1.1);
@@ -372,7 +408,8 @@ const levels = [
     theme: "#9bff7a",
     accent: "#e8ffd4",
     bpm: 138,
-    lengthBeats: 132,
+    lengthBeats: 1700,
+    marathonStart: 136,
     build(level) {
       addMover(level, 4.2, 0, 62, 2.8);
       addSpike(level, 7.2);
@@ -403,7 +440,8 @@ const levels = [
     theme: "#7ad3ff",
     accent: "#e2f6ff",
     bpm: 144,
-    lengthBeats: 144,
+    lengthBeats: 1950,
+    marathonStart: 148,
     build(level) {
       addSpike(level, 4);
       addGap(level, 6.9, 1.06);
@@ -435,7 +473,8 @@ const levels = [
     theme: "#ffcf5a",
     accent: "#fff0bf",
     bpm: 150,
-    lengthBeats: 156,
+    lengthBeats: 2200,
+    marathonStart: 160,
     build(level) {
       addGap(level, 4.1, 1.08);
       addSpikeRow(level, 7, 3, 0.19);
@@ -470,7 +509,8 @@ const levels = [
     theme: "#ff7a7a",
     accent: "#ffe3e3",
     bpm: 156,
-    lengthBeats: 170,
+    lengthBeats: 2450,
+    marathonStart: 174,
     build(level) {
       addSpike(level, 4);
       addGap(level, 7, 1.12);
@@ -505,7 +545,8 @@ const levels = [
     theme: "#b18cff",
     accent: "#efe6ff",
     bpm: 164,
-    lengthBeats: 186,
+    lengthBeats: 2700,
+    marathonStart: 190,
     build(level) {
       addBlock(level, 4.2, 0, 1);
       addSpike(level, 5.6, 1);
@@ -541,7 +582,8 @@ const levels = [
     theme: "#57f2c1",
     accent: "#f1fff9",
     bpm: 172,
-    lengthBeats: 214,
+    lengthBeats: 3000,
+    marathonStart: 218,
     build(level) {
       addSpike(level, 4.2);
       addGap(level, 7.1, 1.18);
